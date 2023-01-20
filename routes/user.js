@@ -16,7 +16,7 @@ router.post("/user/signup", async (req, res) => {
     }
     //Si l'email est deja utilise par quelqu'un d'autre on renvoie une erreur
     const emailAllReadyUsed = await User.findOne({ email: email });
-    console.log(emailAllReadyUsed);
+    //console.log(emailAllReadyUsed);
     if (emailAllReadyUsed) {
       return res.status(409).json({ message: "email already used" });
     }

@@ -22,7 +22,7 @@ const userRoutes = require("./routes/user");
 app.use(userRoutes);
 app.use(offerRoutes);
 
-app.get("/", (req, res) => {
+app.get("//", (req, res) => {
   res.json("Test de mon serveur");
 });
 

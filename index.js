@@ -2,6 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
+const stripe = require("stripe")(
+  "sk_test_51MbOiLFHbYk9rQIzdQKFT2eAtGMX2BV1Jzw28CcDc3FCfApVWp5HOcrvL6xNYEgFQbwMy0hQGvbmXyElVfqlLe5s00uKHjfgHf"
+);
 require("dotenv").config();
 
 const app = express();

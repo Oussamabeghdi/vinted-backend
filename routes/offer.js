@@ -203,5 +203,23 @@ router.get("/offer/:id", async (req, res) => {
 //     .skip(10)
 //     .limit(5)
 //     .select("product_name product_price");
+router.post("/payment", async (req, res) => {
+  // Réception du token créer via l'API Stripe depuis le Frontend
+  const stripeToken = req.body.stripeToken;
+  // Créer la transaction
+  const response = await stripe.charges.create({
+    amount: product_price,
+
+    title: product_name,
+    // On envoie ici le token
+    source: stripeToken,
+  });
+  console.log(response.status);
+
+  // TODO
+  // Sauvegarder la transaction dans une BDD MongoDB
+
+  res.json(response);
+});
 
 module.exports = router;

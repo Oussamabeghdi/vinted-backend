@@ -3,9 +3,10 @@ const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const fileUpload = require("express-fileupload");
 
-const Offer = require("../models/Offer");
-const convertToBase64 = require("../utils/convertToBase64");
 const isAuthenticated = require("../middlewares/isAuthenticated");
+const convertToBase64 = require("../utils/convertToBase64");
+
+const Offer = require("../models/Offer");
 
 router.post(
   "/offer/publish",
@@ -68,7 +69,7 @@ router.get("/offers", async (req, res) => {
     //Pour chercher un pantalon prix max 200
     const { title, priceMin, priceMax, sort, page } = req.query;
     const a = Number(req.query);
-    console.log(a);
+    // console.log(a);
     const filters = {};
     if (title) {
       filters.product_name = new regExp(title, "i");

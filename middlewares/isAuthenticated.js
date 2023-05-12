@@ -12,7 +12,7 @@ const isAuthenticated = async (req, res, next) => {
 
     // console.log(token);
     const user = await User.findOne({ token: token }).select("account");
-    // console.log(user);
+    console.log(user);
     if (!user) {
       return res.status(401).json({ message: "Unauthorized Authenticated" });
     }
@@ -21,6 +21,7 @@ const isAuthenticated = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(400).json({ message: error.message });
+    console.log(error);
   }
 };
 module.exports = isAuthenticated;

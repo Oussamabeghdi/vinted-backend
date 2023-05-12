@@ -43,7 +43,7 @@ router.post(
             EMPLACEMENT: city,
           },
         ],
-        // product_image: result,
+
         owner: req.user,
       });
       const picture = req.files.picture;
@@ -56,7 +56,7 @@ router.post(
         "account"
       );
       console.log(newOffer);
-      res.json(response);
+      // res.json(response);
       res.json(newOffer);
     } catch (error) {
       res.status(400).json({ message: error.message });

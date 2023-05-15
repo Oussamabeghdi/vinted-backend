@@ -13,6 +13,7 @@ const Offer = mongoose.model("Offer", {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
+  username: String,
 });
 
 module.exports = Offer;

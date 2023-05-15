@@ -63,57 +63,12 @@ router.post(
     }
   }
 );
-
 router.get("/offers", async (req, res) => {
   try {
-    //Pour chercher un pantalon prix max 200
-    const { title, priceMin, priceMax, sort, page } = req.query;
-    const a = Number(req.query);
-    // console.log(a);
-    const filters = {};
-    if (title) {
-      filters.product_name = new regExp(title, "i");
-    }
-    if (priceMin) {
-      filters.product_price = { $gte: Number(priceMin) };
-    }
-    if (priceMax) {
-      if (filters.product_price) {
-        filters.product_price.$lte = Number(priceMax);
-      } else {
-        filters.product_price = { $lte: Number(priceMax) };
-      }
-    }
-
-    const sortFilter = {};
-    if (sort === "price-asc") {
-      sortFilter.product_price = "asc"; // ou 1 ou "ascending"
-    } else if (sort === "price-desc") {
-      sortFilter.product_price = "desc"; // ou -1 ou "descending"
-    }
-    const limit = 5;
-
-    let pageRequired = 1;
-    if (page) pageRequired = Number(page);
-
-    //                        0*5   =0  1*5   =5  2*5   =10  3*5   =15
-    // 5 résultats par page : 1 skip=0, 2 skip=5, 3 skip=10, 4 skip=15
-    // 3 résultats par page : 1 skip=0, 2 skip=3, 3 skip=6, 4 skip=9
-
-    const skip = (pageRequired - 1) * limit;
-
-    const offers = await Offer.find(filters)
-      .sort(sortFilter)
-      .skip(skip)
-      .limit(limit)
-      .populate("owner", "account");
-    // .select("product_price product_name");
-
-    const count = await Offer.countDocuments(filters);
+    const offers = await Offer.find();
 
     const response = {
-      count: count,
-      offers: offers,
+      offers,
     };
 
     res.json(response);
@@ -121,6 +76,64 @@ router.get("/offers", async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+// router.get("/offers", async (req, res) => {
+//   try {
+//     //Pour chercher un pantalon prix max 200
+//     const { title, priceMin, priceMax, sort, page } = req.query;
+//     const a = Number(req.query);
+//     // console.log(a);
+//     const filters = {};
+//     if (title) {
+//       filters.product_name = new regExp(title, "i");
+//     }
+//     if (priceMin) {
+//       filters.product_price = { $gte: Number(priceMin) };
+//     }
+//     if (priceMax) {
+//       if (filters.product_price) {
+//         filters.product_price.$lte = Number(priceMax);
+//       } else {
+//         filters.product_price = { $lte: Number(priceMax) };
+//       }
+//     }
+
+//     const sortFilter = {};
+//     if (sort === "price-asc") {
+//       sortFilter.product_price = "asc"; // ou 1 ou "ascending"
+//     } else if (sort === "price-desc") {
+//       sortFilter.product_price = "desc"; // ou -1 ou "descending"
+//     }
+//     const limit = 5;
+
+//     let pageRequired = 1;
+//     if (page) pageRequired = Number(page);
+
+//     //                        0*5   =0  1*5   =5  2*5   =10  3*5   =15
+//     // 5 résultats par page : 1 skip=0, 2 skip=5, 3 skip=10, 4 skip=15
+//     // 3 résultats par page : 1 skip=0, 2 skip=3, 3 skip=6, 4 skip=9
+
+//     const skip = (pageRequired - 1) * limit;
+
+//     const offers = await Offer.find(filters)
+//       .sort(sortFilter)
+//       .skip(skip)
+//       .limit(limit)
+//       .populate("owner", "account");
+//     // .select("product_price product_name");
+
+//     const count = await Offer.countDocuments(filters);
+
+//     const response = {
+//       count: count,
+//       offers: offers,
+//     };
+
+//     res.json(response);
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// });
 
 router.get("/offer/:id", async (req, res) => {
   try {

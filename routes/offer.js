@@ -102,9 +102,6 @@ router.post("/payment", async (req, res) => {
   });
   console.log(response.status);
 
-  // TODO
-  // Sauvegarder la transaction dans une BDD MongoDB
-
   res.json(response);
 });
 

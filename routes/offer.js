@@ -43,7 +43,7 @@ router.post(
       });
       const picture = req.files.picture;
       const result = await cloudinary.uploader.upload(convertToBase64(picture));
-      console.log(username);
+
       newOffer.product_image = result;
       await newOffer.save();
       //On populate la clé owner et on affiche seulement la clé account
@@ -51,7 +51,7 @@ router.post(
         "owner",
         "account"
       );
-      console.log(response);
+
       res.json(response);
       res.json(newOffer);
     } catch (error) {
@@ -89,78 +89,6 @@ router.get("/offer/:id", async (req, res) => {
   }
 });
 
-// const results = await Offer.find({
-//   product_name: /vert/i,
-//   product_price: { $gte: 20, $lte: 200 },
-// })
-//   .sort({ product_price: -1 || 1 })
-//   .select("product_name product_price");
-
-// const regExp = /jeans/i;
-// const results = await Offer.find({
-//   product_name: /jeans/i,
-//   product_price: { $lte: 200 },
-// });
-
-// res.json(offers);
-// res.json(response);
-
-//Pour chercher un prix compris entre 40 et 200
-
-// const regExp1 = /[A-Za-z0-9_|\s]/g;
-// const results1 = await Offer.find({
-//   product_name: regExp1,
-//   product_price: { $gte: 40, $lte: 200 },
-// });
-
-//Pour afficher la deuxieme page
-
-//const result = await Offer.find().skip(5).limit(5);
-//console.log
-// ("ok");
-//res.json
-// (result);
-//router.get
-// ("/offers", async (req, res) => {
-// FIND
-//   const regExp = /chaussettes/i;
-//   const regExp = new RegExp("e", "i");
-//   const results = await Offer.find({ product_name: regExp }).select(
-//     "product_name product_price"
-//   );
-
-//   FIND AVEC FOURCHETTES DE PRIX
-//   $gte =  greater than or equal >=
-//   $lte = lower than or equal <=
-//   $lt = lower than <
-//   $gt = greater than >
-//   const results = await Offer.find({
-//     product_price: {
-//       $gte: 55,
-//       $lte: 200,
-//     },
-//   }).select("product_name product_price");
-
-//   SORT
-//   "asc" === "ascending" === 1
-//   "desc" === "descending" === -1
-//   const results = await Offer.find()
-//     .sort({ product_price: -1 })
-//     .select("product_name product_price");
-
-//   ON PEUT TOUT CHAINER
-// const results = await Offer.find({
-//   product_name: /vert/i,
-//   product_price: { $gte: 20, $lte: 200 },
-// })
-//   .sort({ product_price: -1 })
-//   .select("product_name product_price");
-
-//   SKIP ET LIMIT
-//   const results = await Offer.find()
-//     .skip(10)
-//     .limit(5)
-//     .select("product_name product_price");
 router.post("/payment", async (req, res) => {
   // Réception du token créer via l'API Stripe depuis le Frontend
   const stripeToken = req.body.stripeToken;

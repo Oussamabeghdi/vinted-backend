@@ -7,6 +7,9 @@ const isAuthenticated = require("../middlewares/isAuthenticated");
 const convertToBase64 = require("../utils/convertToBase64");
 
 const Offer = require("../models/Offer");
+const stripe = require("stripe")(
+  "sk_test_51MbOiLFHbYk9rQIzdQKFT2eAtGMX2BV1Jzw28CcDc3FCfApVWp5HOcrvL6xNYEgFQbwMy0hQGvbmXyElVfqlLe5s00uKHjfgHf"
+);
 
 router.post(
   "/offer/publish",
@@ -43,7 +46,7 @@ router.post(
       });
       const picture = req.files.picture;
       const result = await cloudinary.uploader.upload(convertToBase64(picture));
-
+      console.log(username);
       newOffer.product_image = result;
       await newOffer.save();
       //On populate la clé owner et on affiche seulement la clé account
@@ -51,7 +54,7 @@ router.post(
         "owner",
         "account"
       );
-
+      console.log(response);
       res.json(response);
       res.json(newOffer);
     } catch (error) {
@@ -90,17 +93,16 @@ router.get("/offer/:id", async (req, res) => {
 });
 
 router.post("/payment", async (req, res) => {
-  // Réception du token créer via l'API Stripe depuis le Frontend
-  const stripeToken = req.body.stripeToken;
+  const { stripeToken, title, amount } = req.body;
+
   // Créer la transaction
   const response = await stripe.charges.create({
-    amount: product_price,
-
-    title: product_name,
+    amount,
+    currency: "eur",
+    description: title,
     // On envoie ici le token
     source: stripeToken,
   });
-  console.log(response.status);
 
   res.json(response);
 });

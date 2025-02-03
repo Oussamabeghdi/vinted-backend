@@ -69,11 +69,9 @@ router.get("/offers", async (req, res) => {
     // Recherche toutes les offres dans la base de données
     const offers = await Offer.find();
 
-    const response = {
-      offers,
-    };
+    const response = { offers };
     // Envoi de la réponse au client en format JSON
-    res.json("reponse" + response);
+    res.json(response);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

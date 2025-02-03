@@ -4,8 +4,7 @@ const Offer = mongoose.model("Offer", {
   product_name: String,
   product_description: String,
   product_price: {
-    type: String,
-    get: (v) => (v / 100).toFixed(2),
+    type: Number,
   },
   product_details: Array,
   product_image: Object,

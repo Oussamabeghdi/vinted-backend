@@ -73,7 +73,7 @@ router.get("/offers", async (req, res) => {
       offers,
     };
     // Envoi de la réponse au client en format JSON
-    res.json(response);
+    res.json("reponse" + response);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

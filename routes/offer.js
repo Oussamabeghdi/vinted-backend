@@ -1,4 +1,5 @@
 const express = require("express");
+const nodemailer = require("nodemailer");
 const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const fileUpload = require("express-fileupload");
@@ -6,6 +7,7 @@ const fileUpload = require("express-fileupload");
 const isAuthenticated = require("../middlewares/isAuthenticated");
 const convertToBase64 = require("../utils/convertToBase64");
 
+const User = require("../models/User");
 const Offer = require("../models/Offer");
 const stripe = require("stripe")(process.env.REACT_APP_STRIPE_TOKEN);
 
@@ -14,7 +16,6 @@ router.post("/offer/publish", isAuthenticated, fileUpload(), async (req, res) =>
     const { title, description, price, condition, city, brand, size, color } = req.body;
 
     const picture = req.files.picture;
-    // Création d'une nouvelle instance de l'offre avec les détails fournis
     const newOffer = new Offer({
       product_name: title,
       product_description: description,
@@ -40,15 +41,10 @@ router.post("/offer/publish", isAuthenticated, fileUpload(), async (req, res) =>
       username: req.user.account.username,
     });
 
-    // On récupère l'image envoyée dans les fichiers de la requête
-
-    // On envoie l'image à Cloudinary pour l'héberger, après l'avoir convertie en base64
     const result = await cloudinary.uploader.upload(convertToBase64(picture));
 
-    // Ajout de l'image au nouvel objet de l'offre
     newOffer.product_image = result;
 
-    // Sauvegarde de la nouvelle offre dans la base de données
     await newOffer.save();
 
     //J'utilise populate pour ajouter des informations sur le propriétaire dans la réponse,
@@ -66,11 +62,10 @@ router.post("/offer/publish", isAuthenticated, fileUpload(), async (req, res) =>
 // Route pour récupérer toutes les offres
 router.get("/offers", async (req, res) => {
   try {
-    // Recherche toutes les offres dans la base de données
     const offers = await Offer.find();
 
     const response = { offers };
-    // Envoi de la réponse au client en format JSON
+
     res.json(response);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -80,9 +75,6 @@ router.get("/offers", async (req, res) => {
 // Route pour récupérer une offre spécifique en fonction de l'ID
 router.get("/offer/:id", async (req, res) => {
   try {
-    console.log(req.params);
-    // Recherche de l'offre par son ID et récupération des détails du propriétaire
-
     const offer = await Offer.findById(req.params.id).populate("owner", "account");
     res.json(offer);
   } catch (error) {
@@ -90,24 +82,77 @@ router.get("/offer/:id", async (req, res) => {
   }
 });
 // Route pour gérer le paiement
+// router.post("/payment", async (req, res) => {
+
+//   const { stripeToken, title, amount, email, items } = req.body;
+
+//   const response = await stripe.charges.create({
+
+//     amount,
+//     currency: "eur",
+//     description: title,
+//     source: stripeToken,
+//   });
+
+//   res.json(response);
+// });
 router.post("/payment", async (req, res) => {
-  // Récupération des informations du corps de la requête
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
 
-  const { stripeToken, title, amount } = req.body;
+    const token = authHeader.split(" ")[1];
 
-  // Création de la transaction via Stripe
-  const response = await stripe.charges.create({
-    //Montant à prélever
-    amount,
-    // Devise utilisée pour le paiement
-    currency: "eur",
-    // Description du paiement (généralement le titre de l'offre)
-    description: title,
-    // Token Stripe permettant d'authentifier la transaction
-    source: stripeToken,
-  });
+    const user = await User.findOne({ token });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    const { stripeToken, title, amount, items } = req.body;
 
-  res.json(response);
+    const response = await stripe.charges.create({
+      amount,
+      currency: "eur",
+      description: title,
+      source: stripeToken,
+    });
+
+    if (response.status === "succeeded") {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+
+      const htmlContent = `
+        <h2>Paiement confirmé ✅</h2>
+        <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
+        <h4>Détails de la commande :</h4>
+        <ul>
+          ${
+            items && items.length > 0
+              ? items
+                  .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
+                  .join("")
+              : "<li>Aucun détail de produit</li>"
+          }
+        </ul>
+        <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
+      `;
+
+      await transporter.sendMail({
+        from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
+        to: user.email,
+        subject: "Confirmation de votre paiement",
+        html: htmlContent,
+      });
+
+      return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
+    }
+
+    return res.status(400).json({ success: false, message: "Échec du paiement." });
+  } catch (error) {
+    console.error("Erreur lors du paiement :", error.message);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
-
 module.exports = router;

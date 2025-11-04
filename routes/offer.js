@@ -96,68 +96,133 @@ router.get("/offer/:id", async (req, res) => {
 
 //   res.json(response);
 // });
+// router.post("/payment", async (req, res) => {
+//   try {
+//     const authHeader = req.headers.authorization;
+//     if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+
+//     const token = authHeader.split(" ")[1];
+
+//     const user = await User.findOne({ token });
+//     if (!user) return res.status(401).json({ message: "Unauthorized" });
+//     const { stripeToken, title, amount, items } = req.body;
+
+//     const response = await stripe.charges.create({
+//       amount,
+//       currency: "eur",
+//       description: title,
+//       source: stripeToken,
+//     });
+
+//     if (response.status === "succeeded") {
+//       res.json({ success: true, message: "Paiement réussi" });
+
+//       (async () => {
+//         try {
+//           const transporter = nodemailer.createTransport({
+//             service: "gmail",
+//             auth: {
+//               user: process.env.SMTP_USER,
+//               pass: process.env.SMTP_PASS,
+//             },
+//           });
+//           const htmlContent = `
+//         <h2>Paiement confirmé ✅</h2>
+//         <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
+//         <h4>Détails de la commande :</h4>
+//         <ul>
+//           ${
+//             items && items.length > 0
+//               ? items
+//                   .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
+//                   .join("")
+//               : "<li>Aucun détail de produit</li>"
+//           }
+//         </ul>
+//         <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
+//       `;
+
+//           await transporter.sendMail({
+//             from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
+//             to: user.email,
+//             subject: "Confirmation de votre paiement",
+//             html: htmlContent,
+//           });
+//         } catch (mailError) {
+//           console.error("Erreur lors de l'envoi de l'email :", mailError.message);
+//         }
+//       })().catch((err) => console.error("Erreur interne email async :", err.message));
+//     } else {
+//       return res.status(400).json({ success: false, message: "Échec du paiement." });
+//     }
+//   } catch (error) {
+//     console.error("Erreur lors du paiement :", error.message);
+//     return res.status(500).json({ success: false, error: error.message });
+//   }
+// });
 router.post("/payment", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
 
     const token = authHeader.split(" ")[1];
-
     const user = await User.findOne({ token });
     if (!user) return res.status(401).json({ message: "Unauthorized" });
+
     const { stripeToken, title, amount, items } = req.body;
 
-    const response = await stripe.charges.create({
+    const charge = await stripe.charges.create({
       amount,
       currency: "eur",
       description: title,
       source: stripeToken,
     });
 
-    if (response.status === "succeeded") {
-      res.json({ success: true, message: "Paiement réussi" });
-
-      (async () => {
-        try {
-          const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-              user: process.env.SMTP_USER,
-              pass: process.env.SMTP_PASS,
-            },
-          });
-          const htmlContent = `
-        <h2>Paiement confirmé ✅</h2>
-        <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
-        <h4>Détails de la commande :</h4>
-        <ul>
-          ${
-            items && items.length > 0
-              ? items
-                  .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
-                  .join("")
-              : "<li>Aucun détail de produit</li>"
-          }
-        </ul>
-        <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
-      `;
-
-          await transporter.sendMail({
-            from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
-            to: user.email,
-            subject: "Confirmation de votre paiement",
-            html: htmlContent,
-          });
-        } catch (mailError) {
-          console.error("Erreur lors de l'envoi de l'email :", mailError.message);
-        }
-      })();
-    } else {
+    if (charge.status !== "succeeded") {
       return res.status(400).json({ success: false, message: "Échec du paiement." });
     }
+
+    res.status(200).json({ success: true, message: "Paiement réussi" });
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const htmlContent = `
+      <h2>Paiement confirmé ✅</h2>
+      <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
+      <h4>Détails de la commande :</h4>
+      <ul>
+        ${
+          items?.length
+            ? items
+                .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
+                .join("")
+            : "<li>Aucun détail de produit</li>"
+        }
+      </ul>
+      <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
+    `;
+
+    transporter
+      .sendMail({
+        from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
+        to: user.email,
+        subject: "Confirmation de votre paiement",
+        html: htmlContent,
+      })
+      .then(() => console.log("✅ Email de confirmation envoyé à", user.email))
+      .catch((mailError) => console.error("Erreur lors de l'envoi du mail :", mailError.message));
   } catch (error) {
     console.error("Erreur lors du paiement :", error.message);
-    return res.status(500).json({ success: false, error: error.message });
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, error: error.message });
+    }
   }
 });
+
 module.exports = router;

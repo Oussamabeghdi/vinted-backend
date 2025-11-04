@@ -185,14 +185,22 @@ router.post("/payment", async (req, res) => {
     res.status(200).json({ success: true, message: "Paiement réussi" });
 
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
+      host: "smtp.sendgrid.net",
       port: 587,
-      secure: false,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: "apikey",
+        pass: process.env.SENDGRID_API_KEY,
       },
     });
+    // const transporter = nodemailer.createTransport({
+    //   host: "smtp.gmail.com",
+    //   port: 587,
+    //   secure: false,
+    //   auth: {
+    //     user: process.env.SMTP_USER,
+    //     pass: process.env.SMTP_PASS,
+    //   },
+    // });
 
     const htmlContent = `
       <h2>Paiement confirmé ✅</h2>

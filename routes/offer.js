@@ -145,13 +145,13 @@ router.post("/payment", async (req, res) => {
         subject: "Confirmation de votre paiement",
         html: htmlContent,
       });
-      // return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
+      return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
     }
 
     return res.status(400).json({ success: false, message: "Échec du paiement." });
   } catch (error) {
     console.error("Erreur lors du paiement :", error.message);
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ success: false, error: error.message });
   }
 });
 module.exports = router;

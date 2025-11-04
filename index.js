@@ -6,7 +6,18 @@ const stripe = require("stripe")(process.env.REACT_APP_STRIPE_TOKEN);
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://vinted-clone-ob.netlify.app",
+      "http://localhost:5173",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 mongoose.set("strictQuery", false);

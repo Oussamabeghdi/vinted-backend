@@ -116,14 +116,17 @@ router.post("/payment", async (req, res) => {
 
     if (response.status === "succeeded") {
       res.json({ success: true, message: "Paiement réussi" });
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      const htmlContent = `
+
+      (async () => {
+        try {
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.SMTP_USER,
+              pass: process.env.SMTP_PASS,
+            },
+          });
+          const htmlContent = `
         <h2>Paiement confirmé ✅</h2>
         <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
         <h4>Détails de la commande :</h4>
@@ -139,16 +142,19 @@ router.post("/payment", async (req, res) => {
         <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
       `;
 
-      await transporter.sendMail({
-        from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
-        to: user.email,
-        subject: "Confirmation de votre paiement",
-        html: htmlContent,
-      });
-      return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
+          await transporter.sendMail({
+            from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
+            to: user.email,
+            subject: "Confirmation de votre paiement",
+            html: htmlContent,
+          });
+        } catch (mailError) {
+          console.error("Erreur lors de l'envoi de l'email :", mailError.message);
+        }
+      })();
+    } else {
+      return res.status(400).json({ success: false, message: "Échec du paiement." });
     }
-
-    return res.status(400).json({ success: false, message: "Échec du paiement." });
   } catch (error) {
     console.error("Erreur lors du paiement :", error.message);
     return res.status(500).json({ success: false, error: error.message });

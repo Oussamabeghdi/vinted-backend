@@ -115,14 +115,7 @@ router.post("/payment", async (req, res) => {
     });
 
     if (response.status === "succeeded") {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-
+      res.json({ success: true, message: "Paiement réussi" });
       const htmlContent = `
         <h2>Paiement confirmé ✅</h2>
         <p>Merci pour votre achat sur <strong>Vinted-cloné</strong>.</p>
@@ -138,6 +131,13 @@ router.post("/payment", async (req, res) => {
         </ul>
         <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
       `;
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
       await transporter.sendMail({
         from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
@@ -145,8 +145,7 @@ router.post("/payment", async (req, res) => {
         subject: "Confirmation de votre paiement",
         html: htmlContent,
       });
-
-      return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
+      // return res.json({ success: true, message: "Paiement réussi et e-mail envoyé." });
     }
 
     return res.status(400).json({ success: false, message: "Échec du paiement." });

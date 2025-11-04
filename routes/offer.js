@@ -1,5 +1,6 @@
 const express = require("express");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+
 const router = express.Router();
 const cloudinary = require("cloudinary").v2;
 const fileUpload = require("express-fileupload");
@@ -184,23 +185,8 @@ router.post("/payment", async (req, res) => {
 
     res.status(200).json({ success: true, message: "Paiement réussi" });
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp.sendgrid.net",
-      port: 587,
-      auth: {
-        user: "apikey",
-        pass: process.env.SENDGRID_API_KEY,
-      },
-    });
-    // const transporter = nodemailer.createTransport({
-    //   host: "smtp.gmail.com",
-    //   port: 587,
-    //   secure: false,
-    //   auth: {
-    //     user: process.env.SMTP_USER,
-    //     pass: process.env.SMTP_PASS,
-    //   },
-    // });
+    // Configuration SendGrid
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
     const htmlContent = `
       <h2>Paiement confirmé ✅</h2>
@@ -218,15 +204,22 @@ router.post("/payment", async (req, res) => {
       <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>
     `;
 
-    transporter
-      .sendMail({
-        from: `"Vinted_clone" <${process.env.SMTP_USER}>`,
-        to: user.email,
-        subject: "Confirmation de votre paiement",
-        html: htmlContent,
-      })
+    const msg = {
+      to: user.email,
+      from: process.env.SENDGRID_VERIFIED_SENDER, // Doit être une adresse vérifiée dans SendGrid
+      subject: "Confirmation de votre paiement",
+      html: htmlContent,
+    };
+
+    sgMail
+      .send(msg)
       .then(() => console.log("✅ Email de confirmation envoyé à", user.email))
-      .catch((mailError) => console.error("Erreur lors de l'envoi du mail :", mailError.message));
+      .catch((mailError) => {
+        console.error("Erreur lors de l'envoi du mail :", mailError.message);
+        if (mailError.response) {
+          console.error(mailError.response.body);
+        }
+      });
   } catch (error) {
     console.error("Erreur lors du paiement :", error.message);
     if (!res.headersSent) {

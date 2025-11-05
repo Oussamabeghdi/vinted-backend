@@ -48,16 +48,14 @@ router.post("/user/signup", async (req, res) => {
 });
 router.post("/user/login", async (req, res) => {
   try {
-    console.log(req.body);
-    // res.json("ok");
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) {
       if (message) return res.status(401).json({ message: "Unauthorized 1" });
     }
-    console.log(user);
+
     const newHash = SHA256(password + user.salt).toString(encBase64);
-    console.log(newHash);
+
     if (newHash !== user.hash) {
       return res.status(401).json({ message: "Unauthorized" });
     }

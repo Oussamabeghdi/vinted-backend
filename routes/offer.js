@@ -218,7 +218,7 @@ L'équipe Vinted Clone
       
       <p>Nous avons bien reçu votre paiement. Merci pour votre confiance !</p>
 
-            < style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #09b1ba;">
+            <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #09b1ba;">
       
 
       <h4 style="margin-top: 0; color: #333;">Détails de la commande :</h4>

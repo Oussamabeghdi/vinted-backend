@@ -187,23 +187,23 @@ router.post("/payment", async (req, res) => {
 
     // Configuration SendGrid
     sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    const textContent = `
-Bonjour,
+    //     const textContent = `
+    // Bonjour,
 
-Merci pour votre achat sur Vinted Clone.
+    // Merci pour votre achat sur Vinted Clone.
 
-Détails de votre commande :
-${
-  items?.length
-    ? items.map((item) => `- ${item.name || "Produit"} : ${item.price || 0} €`).join("\n")
-    : "Aucun article"
-}
+    // Détails de votre commande :
+    // ${
+    //   items?.length
+    //     ? items.map((item) => `- ${item.name || "Produit"} : ${item.price || 0} €`).join("\n")
+    //     : "Aucun article"
+    // }
 
-Total payé : ${(amount / 100).toFixed(2)} €
+    // Total payé : ${(amount / 100).toFixed(2)} €
 
-Cordialement,
-L'équipe Vinted Clone
-`;
+    // Cordialement,
+    // L'équipe Vinted Clone
+    // `;
     const htmlContent = `
     <!DOCTYPE html>
 <html lang="fr">
@@ -214,34 +214,27 @@ L'équipe Vinted Clone
  <div style="background: #f4f4f4; padding: 20px;">
     <div style="background: white; padding: 30px; border-radius: 5px;">
       <h2 style="color: #09b1ba; margin-top: 0;">Paiement confirmé ✅</h2>
-            <p>Bonjour,</p>
-      
-      <p>Nous avons bien reçu votre paiement. Merci pour votre confiance !</p>
-
-            <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #09b1ba;">
-      
-
-      <h4 style="margin-top: 0; color: #333;">Détails de la commande :</h4>
-      <ul>
-        ${
-          items?.length
-            ? items
-                .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
-                .join("")
-            : "<li>Aucun détail de produit</li>"
-        }
-      </ul>
-      <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>  </div>
- <p>Vos articles seront expédiés sous peu.</p>
-      
-      <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe Vinted Clone</strong></p>
+        <p>Bonjour,</p>
+        <p>Nous avons bien reçu votre paiement. Merci pour votre confiance !</p>
+        <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #09b1ba;">
+          <h4 style="margin-top: 0; color: #333;">Détails de la commande :</h4>
+          <ul>
+          ${
+            items?.length
+              ? items
+                  .map((item) => `<li>${item.name || "Produit"} - ${item.price || 0} €</li>`)
+                  .join("")
+              : "<li>Aucun détail de produit</li>"
+          }
+          </ul>
+          <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>  
+        </div>
+          <p>Vos articles seront expédiés sous peu.</p>
+          <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe Vinted Clone</strong></p>
     </div>
-    
-    <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">
-      Cet email a été envoyé automatiquement
-    </p>
-
-      </div>
+          <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">
+          Cet email a été envoyé automatiquement</p>
+  </div>
 </body>
 </html>
     `;

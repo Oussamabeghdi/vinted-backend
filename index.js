@@ -10,6 +10,7 @@ app.use(
   cors({
     origin: [
       "https://vinted-clone-ob.netlify.app",
+      "http://localhost:3001",
       "http://localhost:5173",
       "http://localhost:3000",
     ],
@@ -41,6 +42,6 @@ app.get("/", (req, res) => {
 app.all("*", (req, res) => {
   res.status(404).json({ message: "This route doesn't exist" });
 });
-app.listen(process.env.PORT, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("Server started");
 });

@@ -51,7 +51,7 @@ router.post("/user/login", async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email });
     if (!user) {
-      if (message) return res.status(401).json({ message: "Unauthorized 1" });
+      return res.status(400).json({ message: "Unauthorized" });
     }
 
     const newHash = SHA256(password + user.salt).toString(encBase64);

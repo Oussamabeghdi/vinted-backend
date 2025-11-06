@@ -230,7 +230,7 @@ router.post("/payment", async (req, res) => {
           <p><strong>Total payé :</strong> ${(amount / 100).toFixed(2)} €</p>  
         </div>
           <p>Vos articles seront expédiés sous peu.</p>
-          <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe Vinted Clone</strong></p>
+          <p style="margin-top: 30px;">Cordialement,<br><strong>L'équipe Vinted Replique</strong></p>
     </div>
           <p style="text-align: center; color: #999; font-size: 12px; margin-top: 20px;">
           Cet email a été envoyé automatiquement</p>
@@ -243,7 +243,7 @@ router.post("/payment", async (req, res) => {
       to: user.email,
       from: process.env.SENDGRID_VERIFIED_SENDER, // Doit être une adresse vérifiée dans SendGrid
       subject: "Confirmation de votre paiement",
-      text: textContent,
+      // text: textContent,
       html: htmlContent,
     };
 
